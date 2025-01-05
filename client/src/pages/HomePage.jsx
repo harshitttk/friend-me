@@ -5,6 +5,8 @@ import { ClipLoader } from "react-spinners";
 
 const HomePage = () => {
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,6 +26,7 @@ const HomePage = () => {
           },
         });
         setUsers(response.data);
+        setFilteredUsers(response.data);
       } catch (error) {
         toast.error(error.response?.data?.message || "Error fetching users");
       } finally {
@@ -33,6 +36,17 @@ const HomePage = () => {
 
     fetchUsers();
   }, []);
+
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    // Filter users based on search query
+    const filtered = users.filter((user) =>
+      user.username.toLowerCase().includes(query)
+    );
+    setFilteredUsers(filtered);
+  };
 
   if (loading) {
     return (
@@ -48,9 +62,19 @@ const HomePage = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
       <h1 className="text-2xl font-bold mb-6">Registered Users</h1>
+      {/* Search Bar */}
+      <input
+        type="text"
+        placeholder="Search users..."
+        className="mb-6 p-2 border border-gray-300 rounded w-96"
+        value={searchQuery}
+        onChange={handleSearch}
+      />
+
+      {/* Users List */}
       <ul className="bg-white shadow-md rounded px-8 py-6 w-96">
-        {users.length > 0 ? (
-          users.map((user) => (
+        {filteredUsers.length > 0 ? (
+          filteredUsers.map((user) => (
             <li key={user._id} className="border-b py-2">
               {user.username}
             </li>
