@@ -11,7 +11,7 @@ const {
 const router = express.Router();
 
 // Fetch all users (excluding logged-in user)
-router.get('/users', protect, getUsers);
+router.get('/', protect, getUsers);
 
 // Search users by username
 router.get('/search', protect, searchUsers);
@@ -20,9 +20,9 @@ router.get('/search', protect, searchUsers);
 router.get('/friends', protect, getFriends);
 
 // Add a friend
-router.post('/friends/add', protect, addFriend);
+router.post('/friends/:id', protect, addFriend);
 
 // Remove a friend
-router.post('/friends/remove', protect, removeFriend);
+router.delete('/friends/:id', protect, removeFriend);
 
 module.exports = router;
