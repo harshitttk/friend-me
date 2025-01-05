@@ -21,7 +21,7 @@ const AuthForm = ({ type }) => {
     try {
       const endpoint = type === "login" ? "/login" : "/signup";
       const response = await axios.post(
-        `http://localhost:8080/api/auth${endpoint}`,
+        `https://friend-me-one.vercel.app/api/auth${endpoint}`,
         { username, password }
       );
 
