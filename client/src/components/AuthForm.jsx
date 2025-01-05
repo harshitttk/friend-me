@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const AuthForm = ({ type }) => {
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +28,10 @@ const AuthForm = ({ type }) => {
       toast.success(type === "login" ? "Login successful!" : "Signup successful!");
       if (type === "login") {
         localStorage.setItem("token", response.data.token);
+        navigate("/home");
+      }
+      if (type === "signup") {
+        navigate("/login");
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
