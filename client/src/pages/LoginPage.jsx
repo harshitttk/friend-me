@@ -1,5 +1,6 @@
 import React from "react";
 import AuthForm from "../components/AuthForm";
+import { Link } from "react-router-dom";
 
 const LoginPage = () => {
   return (
@@ -10,9 +11,9 @@ const LoginPage = () => {
       <AuthForm type="login" />
       <p className="mt-4">
         Don't have an account?{" "}
-        <a href="/signup" className="text-blue-500 hover:underline">
+        <Link to={"/signup"} className="underline text-blue-600">
           Sign Up
-        </a>
+        </Link>
       </p>
     </div>
   );
