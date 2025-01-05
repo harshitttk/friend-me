@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an axios instance
 const axiosInstance = axios.create({
-  baseURL: 'https://friend-me-one.vercel.app/api', // Base URL for the backend API
+  baseURL: 'https://friend-me-jevz.onrender.com/api', // Base URL for the backend API
   headers: {
     'Content-Type': 'application/json',
   },
