@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../utils/axiosInstance"; // Import the axios instance
 import toast from "react-hot-toast";
 import { ClipLoader } from "react-spinners";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +11,7 @@ const HomePage = () => {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState("all"); // "all" or "friends"
+  const [view, setView] = useState("all");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,22 +19,19 @@ const HomePage = () => {
 
       if (!token) {
         toast.error("Unauthorized access! Please log in.");
+        navigate("/login");
         setLoading(false);
         return;
       }
 
       try {
-        // Fetch all users
-        const usersResponse = await axios.get("http://localhost:8080/api/users", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        // Fetch all users using the axios instance
+        const usersResponse = await axiosInstance.get("/users");
         setUsers(usersResponse.data);
         setFilteredUsers(usersResponse.data);
 
-        // Fetch friends list
-        const friendsResponse = await axios.get("http://localhost:8080/api/users/friends", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        // Fetch friends list using the axios instance
+        const friendsResponse = await axiosInstance.get("/users/friends");
         setFriends(friendsResponse.data);
       } catch (error) {
         toast.error(error.response?.data?.message || "Error fetching data");
@@ -44,7 +41,7 @@ const HomePage = () => {
     };
 
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
@@ -53,7 +50,9 @@ const HomePage = () => {
     const filtered =
       view === "all"
         ? users.filter((user) => user.username.toLowerCase().includes(query))
-        : friends.filter((friend) => friend.username.toLowerCase().includes(query));
+        : friends.filter((friend) =>
+            friend.username.toLowerCase().includes(query)
+          );
 
     setFilteredUsers(filtered);
   };
@@ -73,22 +72,13 @@ const HomePage = () => {
     }
 
     try {
-      const response = await axios.post(
-        `http://localhost:8080/api/users/friends/${friendId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axiosInstance.post(`/users/friends/${friendId}`);
       toast.success(response.data.message);
 
-      // Update the friends list by adding the newly added friend
+      // Update the friends list
       const newFriend = users.find((user) => user._id === friendId);
       setFriends((prevFriends) => [...prevFriends, newFriend]);
 
-      // Update the filtered friends list if it's currently being viewed
       if (view === "friends") {
         setFilteredUsers((prevUsers) => [...prevUsers, newFriend]);
       }
@@ -106,22 +96,17 @@ const HomePage = () => {
     }
 
     try {
-      const response = await axios.delete(
-        `http://localhost:8080/api/users/friends/${friendId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axiosInstance.delete(`/users/friends/${friendId}`);
       toast.success(response.data.message);
 
-      // Remove the friend from the friends list
-      setFriends((prevFriends) => prevFriends.filter((friend) => friend._id !== friendId));
+      setFriends((prevFriends) =>
+        prevFriends.filter((friend) => friend._id !== friendId)
+      );
 
-      // Update the filtered friends list if it's currently being viewed
       if (view === "friends") {
-        setFilteredUsers((prevUsers) => prevUsers.filter((user) => user._id !== friendId));
+        setFilteredUsers((prevUsers) =>
+          prevUsers.filter((user) => user._id !== friendId)
+        );
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Error removing friend");
@@ -129,10 +114,9 @@ const HomePage = () => {
   };
 
   const handleLogout = () => {
-    // Remove the token from localStorage
     localStorage.removeItem("token");
     toast.success("Logged out successfully!");
-    navigate("/login"); // Redirect to login page after logout
+    navigate("/login");
   };
 
   if (loading) {
@@ -183,16 +167,20 @@ const HomePage = () => {
       <ul className="bg-white shadow-md rounded px-8 py-6 w-96">
         {filteredUsers.length > 0 ? (
           filteredUsers.map((user) => (
-            <li key={user._id} className="border-b py-2 flex justify-between items-center">
+            <li
+              key={user._id}
+              className="border-b py-2 flex justify-between items-center"
+            >
               <span>{user.username}</span>
-              {view === "all" && !friends.some((friend) => friend._id === user._id) && (
-                <button
-                  onClick={() => addFriend(user._id)}
-                  className="bg-blue-500 text-white px-4 py-1 rounded"
-                >
-                  Add Friend
-                </button>
-              )}
+              {view === "all" &&
+                !friends.some((friend) => friend._id === user._id) && (
+                  <button
+                    onClick={() => addFriend(user._id)}
+                    className="bg-blue-500 text-white px-4 py-1 rounded"
+                  >
+                    Add Friend
+                  </button>
+                )}
               {view === "friends" && (
                 <button
                   onClick={() => removeFriend(user._id)}
@@ -207,14 +195,14 @@ const HomePage = () => {
           <li className="text-center text-gray-500">No {view} found</li>
         )}
       </ul>
+      {/* Logout Button */}
       <div className="mt-5">
-        {/* Logout Button */}
-      <button
-        onClick={handleLogout}
-        className="bg-red-500 text-white px-4 py-2 mb-4 rounded"
-      >
-        Logout
-      </button>
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 text-white px-4 py-2 mb-4 rounded"
+        >
+          Logout
+        </button>
       </div>
     </div>
   );
