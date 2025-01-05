@@ -9,7 +9,11 @@ const userRoutes = require('./routes/userRoutes');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  // origin: 'http://localhost:5173',
+  origin: 'https://friend-me-ui.vercel.app',  // Replace with your Vercel frontend URL
+  credentials: true,  // Allow cookies if needed
+}));
 app.use(bodyParser.json());
 
 // Database Connection
